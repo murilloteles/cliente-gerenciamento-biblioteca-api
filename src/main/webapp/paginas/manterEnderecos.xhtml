@@ -1,0 +1,136 @@
+<ui:composition template="/WEB-INF/templates/Layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	
+<ui:define name="corpo">
+
+	<h:form id="frm-endereco">
+	<f:metadata>
+		<f:viewAction action="#{enderecoBean.consultarTodos}" />
+	</f:metadata>
+	
+	<p:fieldset legend="Cadastro de Endereços">
+		<p:messages id="msg-endereco"/>
+		
+		<div id="barra-tarefas" style="float:right">
+			<p:toolbar style="padding:1px; margin-bottom: 5px" id="operacoes-toolbar">
+		        <p:toolbarGroup>
+		            <p:commandButton title="Novo" icon="pi pi-file" styleClass="ui-button-success" style="margin-right: 5px;"
+		            	action="#{enderecoBean.prepararNovoCadastro}" 
+		            	process="@this" update="endereco-dialog" oncomplete="PF('edicaoEnderecoDialog').show()">
+		            	
+		            		<p:resetInput target="endereco-dialog"/>
+		            </p:commandButton>
+		            
+		            <p:commandButton title="Pesquisar" icon="pi pi-search" styleClass="mr-2" style="margin-right: 5px;"/>
+		
+		            <i class="pi pi-bars px-2" style="margin-right: 5px;"/>
+		
+		            <p:commandButton title="Editar" icon="pi pi-pencil" 
+		            	styleClass="ui-button-warning mr-2" style="margin-right: 5px;"
+		            	disabled="#{enderecoBean.enderecoSelecionado == null}"
+		            	process="@this" update="endereco-dialog" oncomplete="PF('edicaoEnderecoDialog').show()">
+	            			<p:resetInput target="endereco-dialog"/>
+		            		<f:setPropertyActionListener value="#{enderecoBean.enderecoSelecionado}" target="#{enderecoBean.enderecoEdicao}"/>
+		            </p:commandButton>
+		            	
+		            <p:commandButton title="Deletar" icon="pi pi-trash" 
+		            	styleClass="ui-button-danger" style="margin-right: 5px;"
+		            	disabled="#{enderecoBean.enderecoSelecionado == null}"
+		            	action="#{enderecoBean.excluir}" process="@this" update="operacoes-toolbar msg-endereco tabela-enderecos">
+		            	
+		            	<p:confirm icon="pi pi-exclamation-triangle" header="Confirmação de exclusão"
+		            		message="Tem certeza que deseja excluir o endereço?"/>
+		            </p:commandButton>
+		            
+		            <p:commandButton icon="pi pi-file-export" title="Exportar para XLS"
+		            	ajax="false" immediate="true">
+		            	<p:dataExporter type="xls" target="tabela-enderecos" fileName="enderecos"/>
+		            </p:commandButton>
+		            
+		        </p:toolbarGroup>
+		    </p:toolbar>
+		</div>
+			
+		<p:dataTable id="tabela-enderecos" value="#{enderecoBean.enderecos}" var="endereco"
+			emptyMessage="Nenhum endereço cadastrado."
+			paginator="true" rows="5" paginatorPosition="bottom" style="border: 1px solid #304562; clear: both;"
+			selection="#{enderecoBean.enderecoSelecionado}"
+			selectionMode="single" rowKey="#{endereco.id}">
+			
+			<p:ajax event="rowSelect" update="frm-endereco:operacoes-toolbar"/>						
+			
+			<p:column headerText="CEP" sortBy="#{endereco.cep}">
+				<h:outputText value="#{endereco.cep}" />
+			</p:column>
+			<p:column headerText="Logradouro" width="250" sortBy="#{endereco.logradouro}">
+				<h:outputText value="#{endereco.logradouro}" />
+			</p:column>
+			<p:column headerText="Complemento" width="160" sortBy="#{endereco.complemento}">
+				<h:outputText value="#{endereco.complemento}" />
+			</p:column>
+			<p:column headerText="Bairro" width="160" sortBy="#{endereco.bairro}">
+				<h:outputText value="#{endereco.bairro}" />
+			</p:column>
+					<p:column headerText="Número" width="160" sortBy="#{endereco.numero}">
+				<h:outputText value="#{endereco.numero}" />
+			</p:column>
+					<p:column headerText="Localidade" width="160" sortBy="#{endereco.localidade}">
+				<h:outputText value="#{endereco.localidade}" />
+			</p:column>
+					<p:column headerText="UF" width="160" sortBy="#{endereco.uf}">
+				<h:outputText value="#{endereco.uf}" />
+			</p:column>
+		</p:dataTable>
+		
+		<p:dialog header="Novo Endereço" widgetVar="edicaoEnderecoDialog"
+			id="endereco-dialog" resizable="false" modal="true" closeOnEscope="true">
+		
+			<p:messages id="msg-dialog"/>
+			<p:defaultCommand target="btn-salvar" scope="endereco-dialog"/>
+		
+			<h:panelGrid columns="2" id="grid-dialogo">
+			
+				<h:outputLabel for="inp-cep" value="CEP" />
+				<p:inputMask id="inp-cep" size="50" value="#{enderecoBean.enderecoEdicao.cep}" 
+					mask="99999-999"/>
+				
+				<h:outputLabel for="inp-logradouro" value="Logradouro" />
+				<p:inputText id="inp-logradouro" size="50" value="#{enderecoBean.enderecoEdicao.logradouro}" />
+				
+				<h:outputLabel for="inp-complemento" value="Complemento" />
+				<p:inputText id="inp-complemento" size="50" value="#{enderecoBean.enderecoEdicao.complemento}" />
+				
+				<h:outputLabel for="inp-bairro" value="Bairro" />
+				<p:inputText id="inp-bairro" size="50" value="#{enderecoBean.enderecoEdicao.bairro}" />
+				
+				<h:outputLabel for="inp-numero" value="Número" />
+				<p:inputText id="inp-numero" size="50" value="#{enderecoBean.enderecoEdicao.numero}" />
+				
+				<h:outputLabel for="inp-localidade" value="Localidade" />
+				<p:inputText id="inp-localidade" size="50" value="#{enderecoBean.enderecoEdicao.localidade}" />
+				
+				<h:outputLabel for="inp-uf" value="UF" />
+				<p:inputText id="inp-uf" size="50" value="#{enderecoBean.enderecoEdicao.uf}" />
+				
+				<h:outputText value="" />
+				<h:panelGroup style="float:right;">
+					<p:commandButton id="btn-salvar" value="Salvar" icon="pi pi-save" styleClass="ui-button-success" style="margin-right:4px"
+						action="#{enderecoBean.salvar}" 
+						oncomplete="if (!args.validationFailed) PF('edicaoEnderecoDialog').hide()" 
+						process="endereco-dialog" 
+						update="msg-dialog grid-dialogo" />
+						
+					<p:commandButton type="reset" value="Limpar" icon="pi pi-delete-left" styleClass="ui-button-danger"
+						resetValues="true" update="endereco-dialog"/>
+				</h:panelGroup>
+				
+			</h:panelGrid>
+		</p:dialog>
+	</p:fieldset>
+	</h:form>
+</ui:define>
+</ui:composition>

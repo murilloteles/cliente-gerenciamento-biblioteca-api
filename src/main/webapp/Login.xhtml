@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+<h:head>
+	<meta charset="UTF-8"/>
+	
+	<h:outputStylesheet library="devteles" name="estilo.css" />
+</h:head>
+<h:body>
+	<div id="login-dialog">
+		<h:panelGrid columns="2" styleClass="grid-logo-login" id="grid-logo">
+			<h:graphicImage library="devteles" name="logo.jpg" id="imagem-login"/>
+			<h2>Gerenciamento Biblioteca</h2>
+		</h:panelGrid>
+	
+		<h:form id="frm">
+			
+			<p:panelGrid columns="1" styleClass="grid-login">
+			<h:panelGroup>
+				<i class="pi pi-user" style="font-size: 2rem; margin:2px"></i>
+				<p:messages id="msg-login"/>
+			</h:panelGroup>
+			<p:inputText id="usuario" size="50" value="#{loginBean.usuario.nome}" placeholder="Usuário"
+				style="margin-bottom:10px;"/>
+				
+			<p:password id="senha" size="50" value="#{loginBean.usuario.senha}" placeholder="Senha"
+				style="margin-bottom:10px;"/>
+			
+			<p:commandButton id="btn-login" value="Entrar" action="#{loginBean.entrar}" 
+				style="display:block;width:100%;" update="msg-login" styleClass="ui-button-raised ui-button-success"/>
+					
+			</p:panelGrid>
+		</h:form>
+	</div>
+	
+</h:body>
+</html>

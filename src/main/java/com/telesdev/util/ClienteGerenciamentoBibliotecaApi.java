@@ -2,14 +2,13 @@ package com.telesdev.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,10 @@ import java.util.List;
 import javax.inject.Named;
 
 import com.google.gson.Gson;
-import com.telesdev.model.Endereco;
+import com.google.gson.GsonBuilder;
+import com.telesdev.model.ClienteResponse;
+import com.telesdev.model.DetalhesErro;
+import com.telesdev.model.Funcionario;
 import com.telesdev.model.Usuario;
 
 @Named
@@ -30,61 +32,141 @@ public class ClienteGerenciamentoBibliotecaApi implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private static String ENDERECO_SERVIDOR = "http://localhost:8082"; 
-	private static String URN_BASE = "/biblioteca";
-	private static String URN_SERVICOS_ENDERECO = "/endereco";
+	private  String URN_BASE = "http://localhost:8082/biblioteca/funcionarios";
 
-	private static int HTTP_COD_SUCESSO = 200;
-	private static int HTTP_COD_CRIATED = 201;
-	private static int HTTP_COD_NO_CONTENT = 204;
-	private static int HTTP_COD_BAD_REQUEST = 400;
-	private static int HTTP_COD_UNAUTHORIZED = 401;
-	private static int HTTP_COD_NOT_FOUND = 404;
-	private static int HTTP_COD_ERROR_SERVER = 500;
+
+	private  int HTTP_COD_SUCESSO = 200;
+	private  int HTTP_COD_CRIATED = 201;
+	private  int HTTP_COD_NO_CONTENT = 204;
+	private  int HTTP_COD_BAD_REQUEST = 400;
+	private  int HTTP_COD_UNAUTHORIZED = 401;
+	private  int HTTP_COD_NOT_FOUND = 404;
+	private  int HTTP_COD_ERROR_SERVER = 500;
 	
-	private static String POST = "POST";
-	private static String GET = "GET";
-	private static String PUT = "PUT";
-	private static String DELETE = "DELETE";
+	private  String POST = "POST";
+	private  String GET = "GET";
+	private  String PUT = "PUT";
+	private  String DELETE = "DELETE";
 
-	private Usuario usuarioSession;
-
-	public List<Endereco> listarEnderecos(){
+	private  Usuario usuarioSession;
+	
+	public  ClienteResponse salvarFuncionario(Funcionario funcionario){
+	    ClienteResponse response;
 		try {
-			String url = ENDERECO_SERVIDOR + URN_BASE + URN_SERVICOS_ENDERECO + "?pagina=0&tamanho=1";
-
-			HttpURLConnection conn = realizarRequest(GET, url, usuarioSession);
-			List<Endereco> listEndereco = new ArrayList<>();
-		    Gson gson = new Gson();
-		    
-			String jsonArrayEndereco = getLinhaResultadoPaginacao(conn.getInputStream());
-        	Endereco[] enderecoArray = gson.fromJson(jsonArrayEndereco, Endereco[].class);
-        	listEndereco.addAll(Arrays.asList(enderecoArray));
-        	System.out.println(listEndereco);
+		    Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		    String funcionarioJson = gson.toJson(funcionario);
 			
-			return listEndereco;
+			HttpURLConnection conn = realizarRequest(POST, URN_BASE, true, funcionarioJson);
+			
+			if (conn.getResponseCode() == HTTP_COD_CRIATED) {
+				response = new ClienteResponse(true);
+			}else {
+				response = getResponseError(conn.getResponseCode());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			DetalhesErro erro = new DetalhesErro("Sistema indisponível!", HTTP_COD_ERROR_SERVER);
+			response = new ClienteResponse(false, erro);
+		} 
+		
+		return response;
+	}
+	
+	public  ClienteResponse alterarFuncionario(Funcionario funcionario){
+	    ClienteResponse response;
+		try {
+		    Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		    String funcionarioJson = gson.toJson(funcionario);
+			String url = URN_BASE + "/" + funcionario.getId();
+			
+			HttpURLConnection conn = realizarRequest(PUT, url, true, funcionarioJson);
+			
+			if (conn.getResponseCode() == HTTP_COD_NO_CONTENT) {
+				response = new ClienteResponse(true);
+			}else {
+				response = getResponseError(conn.getResponseCode());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			DetalhesErro erro = new DetalhesErro("Sistema indisponível!", HTTP_COD_ERROR_SERVER);
+			response = new ClienteResponse(false, erro);
+		} 
+		
+		return response;
+	}
+	
+	public  ClienteResponse deletarFuncionario(long idFuncionario){
+	    ClienteResponse response;
+		try {
+			String url = URN_BASE + "/" + idFuncionario;
+			HttpURLConnection conn = realizarRequest(DELETE, url, false, null);
+			
+			if (conn.getResponseCode() == HTTP_COD_NO_CONTENT) {
+				response = new ClienteResponse(true);
+			}else {
+				response = getResponseError(conn.getResponseCode());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			DetalhesErro erro = new DetalhesErro("Sistema indisponível!", HTTP_COD_ERROR_SERVER);
+			response = new ClienteResponse(false, erro);
+		} 
+		
+		return response;
+	}
+	
+	public  ClienteResponse buscarFuncionario(long idFuncionario){
+	    ClienteResponse response;
+		try {
+			String url = URN_BASE + "/" + idFuncionario;
+			HttpURLConnection conn = realizarRequest(GET, url, false, null);
+			
+			if (conn.getResponseCode() == HTTP_COD_SUCESSO) {
+			    Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+				String stringResultadoFuncionario = getStringResultadoFuncionario(conn);
+				Funcionario funcionarioReturn =  gson.fromJson(stringResultadoFuncionario, Funcionario.class);
+				response = new ClienteResponse(true, funcionarioReturn);
+				
+			}else {
+				response = getResponseError(conn.getResponseCode());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			DetalhesErro erro = new DetalhesErro("Sistema indisponível!", HTTP_COD_ERROR_SERVER);
+			response = new ClienteResponse(false, erro);
+		} 
+		
+		return response;
+	}
+
+	public List<Funcionario> listarFuncionarios(){
+		List<Funcionario> funcionarios = new ArrayList<>();
+		try {
+			String url = URN_BASE ;
+		    Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		    
+			HttpURLConnection conn = realizarRequest(GET, url, false, null);
+			String stringResultadoFuncionario = getStringResultadoFuncionario(conn);
+			
+			String jsonArray = stringResultadoFuncionario.substring(11,stringResultadoFuncionario.indexOf(",\"pageable"));
+		    Funcionario[] funcionarioArray = gson.fromJson(jsonArray, Funcionario[].class);
+		    funcionarios.addAll(Arrays.asList(funcionarioArray));
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		} 
-	}
-	
-	public String getLinhaResultadoPaginacao(InputStream is) throws IOException {
-		BufferedReader br = null;
-	    br = new BufferedReader(new InputStreamReader(is));
-	    String strCurrentLine;
-        while ((strCurrentLine = br.readLine()) != null) {
-        	return strCurrentLine.substring(11,strCurrentLine.indexOf(",\"pageable"));
-        }
-        return null;
+		return funcionarios;
 	}
 	
 	public  boolean isAutenticacaoValida(Usuario usuario) throws MalformedURLException, ProtocolException, IOException {
 		this.usuarioSession = usuario;
-		String url = ENDERECO_SERVIDOR + URN_BASE + URN_SERVICOS_ENDERECO + "?pagina=0&tamanho=1";
+		String url = URN_BASE + "?pagina=0&tamanho=1";
 
-		HttpURLConnection conn = realizarRequest(GET, url, usuarioSession);
+		HttpURLConnection conn = realizarRequest(GET, url, false, null);
 		
 		if (conn.getResponseCode() == HTTP_COD_UNAUTHORIZED) {
 			System.out.println("Não autorizado!");
@@ -97,18 +179,53 @@ public class ClienteGerenciamentoBibliotecaApi implements Serializable{
 		return true;
 	}
 
-	private HttpURLConnection realizarRequest(String method, String urlRequest, Usuario usuario)
+	private  HttpURLConnection realizarRequest(String method, String urlRequest, boolean existeRequestBody, String jsonStringBody)
 			throws MalformedURLException, IOException, ProtocolException {
 		
 		URL url = new URL(urlRequest);
-		URLConnection connection = url.openConnection();
-		HttpURLConnection conn = (HttpURLConnection) connection;
+		HttpURLConnection con = (HttpURLConnection)url.openConnection();
 
-		String basicAuth = Base64.getEncoder().encodeToString((usuario.getNome()+":"+usuario.getSenha()).getBytes(StandardCharsets.UTF_8));
-		conn.setRequestProperty ("Authorization", "Basic "+basicAuth);
-
-		conn.setRequestMethod(method);
-		return conn;
+		String basicAuth = Base64.getEncoder().encodeToString((usuarioSession.getNome()+":"+usuarioSession.getSenha()).getBytes(StandardCharsets.UTF_8));
+		con.setRequestProperty ("Authorization", "Basic "+basicAuth);
+		con.setRequestMethod(method);
+		if(existeRequestBody) {
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty("Accept", "application/json");
+			con.setDoOutput(true);
+			try(OutputStream os = con.getOutputStream()) {
+			    byte[] input = jsonStringBody.getBytes("utf-8");
+			    os.write(input, 0, input.length);			
+			}
+		}
+		return con;
+	}
+	
+	public  String getStringResultadoFuncionario(HttpURLConnection conn) throws IOException {
+		BufferedReader br = null;
+	    br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+	    String strCurrentLine;
+	    String jsonString = "";
+	    
+        if ((strCurrentLine = br.readLine()) != null) 
+        	jsonString = strCurrentLine;
+        
+        return jsonString;
+	}
+	
+	private  ClienteResponse getResponseError(int responseCode) {
+		DetalhesErro erro;
+		
+		if(responseCode == HTTP_COD_NOT_FOUND) {
+			erro = new DetalhesErro("Funcionário não encontrado!", HTTP_COD_NOT_FOUND);
+			
+		}else if(responseCode == HTTP_COD_BAD_REQUEST) {
+			erro = new DetalhesErro("Requisição inválida!", HTTP_COD_BAD_REQUEST);
+			
+		}else {
+			erro = new DetalhesErro("Sistema indisponível!", HTTP_COD_ERROR_SERVER);
+		}
+		
+		return new ClienteResponse(false, erro);
 	}
 
 	public Usuario getUsuarioSession() {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.telesdev.model.ClienteResponse;
 import com.telesdev.model.Funcionario;
 import com.telesdev.model.Usuario;
 import com.telesdev.util.ClienteGerenciamentoBibliotecaApi;
@@ -32,8 +33,8 @@ public class FuncionarioService implements Serializable{
 	}
 	
 	@Transacional
-	public void buscar(long idFuncionario) {
-		clienteApi.deletarFuncionario(idFuncionario);
+	public ClienteResponse buscar(String nomeSearch) {
+		return clienteApi.buscarFuncionario(nomeSearch);
 	}
 	
 	public List<Funcionario> listar(){

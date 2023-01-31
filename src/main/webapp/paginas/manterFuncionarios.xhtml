@@ -26,7 +26,10 @@
 		            		  <p:resetInput target="funcionario-dialog"/>
 		            </p:commandButton>
 		            
-		            <p:commandButton title="Pesquisar" icon="pi pi-search" styleClass="mr-2" style="margin-right: 5px;"/>
+		            <p:commandButton title="Pesquisar" icon="pi pi-search" styleClass="mr-2" style="margin-right: 5px;"
+		            	action="#{funcionarioBean.prepararPesquisa}" 
+		            	process="@this" 
+		            	update="funcionario-dialog-pesq" oncomplete="PF('edicaoFuncionarioDialogPesq').show()"/>
 		
 		            <i class="pi pi-bars px-2" style="margin-right: 5px;"/>
 		
@@ -130,6 +133,28 @@
 						
 					<p:commandButton type="reset" value="Limpar" icon="pi pi-delete-left" styleClass="ui-button-danger"
 						resetValues="true" update="funcionario-dialog"/>
+				</h:panelGroup>
+				
+			</h:panelGrid>
+		</p:dialog>
+		
+		<p:dialog header="Pesquisar Funcionario" widgetVar="edicaoFuncionarioDialogPesq"
+			id="funcionario-dialog-pesq" resizable="false" modal="true" closeOnEscope="true">
+		
+			<p:messages id="msg-dialog-pesq"/>
+			<p:defaultCommand target="btn-salvar" scope="funcionario-dialog-pesq"/>
+		
+			<h:panelGrid columns="3" id="grid-dialogo-pesq">
+			
+				<h:outputLabel for="inp-nome-pesquisa" value="Nome" />
+				<p:inputText id="inp-nome-pesquisa" size="50" value="#{funcionarioBean.nomeSearch}"/>
+				
+				<h:panelGroup style="float:right;">
+					<p:commandButton id="btn-pesq" value="Pesquisar" icon="pi pi-search" style="margin-left:4px"
+						action="#{funcionarioBean.pesquisar}" 
+						oncomplete="if (#{funcionarioBean.pesquisaSucesso}) PF('edicaoFuncionarioDialogPesq').hide()" 
+						process="funcionario-dialog-pesq" 
+						update="msg-dialog-pesq grid-dialogo-pesq" />
 				</h:panelGroup>
 				
 			</h:panelGrid>

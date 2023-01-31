@@ -12,6 +12,7 @@ import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
 
+import com.telesdev.model.ClienteResponse;
 import com.telesdev.model.Endereco;
 import com.telesdev.model.Funcionario;
 import com.telesdev.model.Usuario;
@@ -34,6 +35,8 @@ public class FuncionarioBean implements Serializable{
 	
 	private List<Endereco> enderecos = new ArrayList<>();
 
+	private String nomeSearch;
+	private boolean pesquisaSucesso;
 	
 	@Inject
 	private FacesMessages messages;
@@ -49,6 +52,21 @@ public class FuncionarioBean implements Serializable{
 		funcionarioService.setUsuario((Usuario) SessionContext.getInstance().getAttribute("usuarioLogado"));
 		enderecos.add(new Endereco());
 		funcionarioEdicao.setEndereco(new Endereco());
+	}
+	
+	public void pesquisar() {
+		ClienteResponse response = funcionarioService.buscar(nomeSearch);
+		if(response.isSucesso()) {
+			pesquisaSucesso = true;
+			messages.info("Funcionário buscado com sucesso!");
+			funcionarios.clear();
+			funcionarios.add(response.getFuncionario());
+	        PrimeFaces.current().ajax().update(Arrays.asList("frm-funcionario:msg-funcionarios","frm-funcionario:tabela-funcionarios","frm-funcionario:funcionario-dialog-pesq"));
+	        prepararPesquisa();
+		}else {
+			pesquisaSucesso = false;
+			messages.error(response.getDetalhesErro().toString());
+		}
 	}
 
 	public void salvar() {
@@ -76,6 +94,10 @@ public class FuncionarioBean implements Serializable{
 		consultarTodosEnderecos();
 	}
 	
+	public void prepararPesquisa() {
+		nomeSearch = "";
+	}
+	
 	public void consultarTodos() {
 		funcionarios = funcionarioService.listar();
 	}
@@ -91,6 +113,15 @@ public class FuncionarioBean implements Serializable{
         for (Endereco endereco : enderecos){
             if (id.equals(endereco.getId())){
                 return endereco;
+            }
+        }
+        return null;
+    }
+	
+	public Funcionario getFuncionario(String nome) {
+        for (Funcionario funcionario : funcionarios){
+            if (funcionario.getNome().equalsIgnoreCase(nome)){
+                return funcionario;
             }
         }
         return null;
@@ -118,6 +149,18 @@ public class FuncionarioBean implements Serializable{
 
 	public List<Endereco> getEnderecos() {
 		return enderecos;
+	}
+
+	public String getNomeSearch() {
+		return nomeSearch;
+	}
+
+	public void setNomeSearch(String nomeSearch) {
+		this.nomeSearch = nomeSearch;
+	}
+
+	public boolean isPesquisaSucesso() {
+		return pesquisaSucesso;
 	}
 
 }

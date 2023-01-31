@@ -5,15 +5,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
@@ -118,11 +123,20 @@ public class ClienteGerenciamentoBibliotecaApi implements Serializable{
 		return response;
 	}
 	
-	public  ClienteResponse buscarFuncionario(long idFuncionario){
+	public  ClienteResponse buscarFuncionario(String nomeSearch){
 	    ClienteResponse response;
 		try {
-			String url = URN_BASE + "/" + idFuncionario;
-			HttpURLConnection conn = realizarRequest(GET, url, false, null);
+			String url = URN_BASE + "/buscar?";
+			Map<String, String> requestParams = new HashMap<>();
+		    requestParams.put("nome", nomeSearch);
+		    
+		    String encodedURL = requestParams.keySet().stream()
+		      .map(key -> key + "=" + encodeValue(requestParams.get(key)))
+		      .collect(Collectors.joining("&", url, ""));
+		    
+		    System.out.println(encodedURL);
+		    
+			HttpURLConnection conn = realizarRequest(GET, encodedURL, false, null);
 			
 			if (conn.getResponseCode() == HTTP_COD_SUCESSO) {
 			    Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
@@ -141,6 +155,14 @@ public class ClienteGerenciamentoBibliotecaApi implements Serializable{
 		} 
 		
 		return response;
+	}
+	private String encodeValue(String value) {
+	    try {
+			return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 
 	public List<Funcionario> listarFuncionarios(){

@@ -1,0 +1,141 @@
+<ui:composition template="/WEB-INF/templates/Layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	
+<ui:define name="corpo">
+
+	<h:form id="frm-funcionario">
+	<f:metadata>
+		<f:viewAction action="#{funcionarioBean.consultarTodos}" />
+	</f:metadata>
+	
+	<p:fieldset legend="Cadastro de Funcionários">
+		<p:messages id="msg-funcionarios"/>
+		
+		<div id="barra-tarefas" style="float:right">
+			<p:toolbar style="padding:1px; margin-bottom: 5px" id="operacoes-toolbar">
+		        <p:toolbarGroup>
+		            <p:commandButton title="Novo" icon="pi pi-file" styleClass="ui-button-success" style="margin-right: 5px;"
+		            	action="#{funcionarioBean.prepararNovoCadastro}" 
+		            	process="@this" 
+		            	update="funcionario-dialog" oncomplete="PF('edicaoFuncionarioDialog').show()">
+		            	
+		            		  <p:resetInput target="funcionario-dialog"/>
+		            </p:commandButton>
+		            
+		            <p:commandButton title="Pesquisar" icon="pi pi-search" styleClass="mr-2" style="margin-right: 5px;"/>
+		
+		            <i class="pi pi-bars px-2" style="margin-right: 5px;"/>
+		
+		            <p:commandButton title="Editar" icon="pi pi-pencil" 
+		            	styleClass="ui-button-warning mr-2" style="margin-right: 5px;"
+		            	disabled="#{funcionarioBean.funcionarioSelecionado == null}"
+		            	process="@this" update="funcionario-dialog" oncomplete="PF('edicaoFuncionarioDialog').show()"
+		            	action="#{funcionarioBean.prepararEdicao}" >
+	            			<p:resetInput target="funcionario-dialog"/>
+		            </p:commandButton>
+		            	
+		            <p:commandButton title="Deletar" icon="pi pi-trash" 
+		            	styleClass="ui-button-danger" style="margin-right: 5px;"
+		            	disabled="#{funcionarioBean.funcionarioSelecionado == null}"
+		            	action="#{funcionarioBean.excluir}" process="@this" update="operacoes-toolbar msg-funcionarios tabela-funcionarios">
+		            	
+		            	<p:confirm icon="pi pi-exclamation-triangle" header="Confirmação de exclusão"
+		            		message="Tem certeza que deseja excluir o funcionario?"/>
+		            </p:commandButton>
+		            
+		            <p:commandButton icon="pi pi-file-export" title="Exportar para XLS"
+		            	ajax="false" immediate="true">
+		            	<p:dataExporter type="xls" target="tabela-funcionarios" fileName="funcionarios"/>
+		            </p:commandButton>
+		            
+		        </p:toolbarGroup>
+		    </p:toolbar>
+		</div>
+		
+		
+		<p:dataTable id="tabela-funcionarios" value="#{funcionarioBean.funcionarios}" var="funcionario"
+			emptyMessage="Nenhum funcionário cadastrado."
+			paginator="true" rows="5" paginatorPosition="bottom" style="border: 1px solid #304562; clear: both;"
+			selection="#{funcionarioBean.funcionarioSelecionado}"
+			selectionMode="single" rowKey="#{funcionario.id}">
+			
+			<p:ajax event="rowSelect" update="frm-funcionario:operacoes-toolbar"/>						
+						
+			<p:column headerText="ID" width="30" sortBy="#{funcionario.id}">
+				<h:outputText value="#{funcionario.id}" />
+			</p:column>
+			<p:column headerText="Nome" width="250" sortBy="#{funcionario.nome}">
+				<h:outputText value="#{funcionario.nome}" />
+			</p:column>
+			<p:column headerText="Nascimento" width="80" sortBy="#{funcionario.nascimento}">
+				<h:outputText value="#{funcionario.nascimento}" >
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Documento" width="80" sortBy="#{funcionario.documento}">
+				<h:outputText value="#{funcionario.documento}" />
+			</p:column>
+			<p:column headerText="Contratação" width="80" sortBy="#{funcionario.dataContratacao}">
+				<h:outputText value="#{funcionario.dataContratacao}" >
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Endereco" width="380" sortBy="#{funcionario.endereco}">
+				<h:outputText value="#{funcionario.endereco}" />
+			</p:column>
+		</p:dataTable>
+		
+		<p:dialog header="Novo Funcionario" widgetVar="edicaoFuncionarioDialog"
+			id="funcionario-dialog" resizable="false" modal="true" closeOnEscope="true">
+		
+			<p:messages id="msg-dialog"/>
+			<p:defaultCommand target="btn-salvar" scope="funcionario-dialog"/>
+		
+			<h:panelGrid columns="2" id="grid-dialogo">
+			
+				<h:outputLabel for="inp-nome" value="Nome" />
+				<p:inputText id="inp-nome" size="50" value="#{funcionarioBean.funcionarioEdicao.nome}"/>
+				
+				<h:outputLabel for="inp-nascimento" value="Nascimento" />
+				<p:calendar id="inp-nascimento" size="10" pattern="dd/MM/yyyy" mask="99/99/9999"
+					value="#{funcionarioBean.funcionarioEdicao.nascimento}"/>
+				
+				<h:outputLabel for="inp-documento" value="Documento" />
+				<p:inputMask id="inp-documento" size="50" value="#{funcionarioBean.funcionarioEdicao.documento}"  mask="999.999.999-99"/>
+				
+				<h:outputLabel for="inp-contratacao" value="Contratação" />
+			    <p:calendar id="inp-contratacao" size="10" pattern="dd/MM/yyyy" mask="99/99/9999" value="#{funcionarioBean.funcionarioEdicao.dataContratacao}"/>
+
+				<h:outputLabel for="inp-nacionalidade" value="Nacionalidade" />
+				<p:inputText id="inp-nacionalidade" size="50" value="#{funcionarioBean.funcionarioEdicao.nacionalidade}" />
+				
+				<h:outputLabel for="inp-endereco" value="Endereço" />
+				<p:selectOneMenu id="inp-endereco" value="#{funcionarioBean.funcionarioEdicao.endereco}" converter="enderecoConverter">
+					<f:selectItem itemLabel="Selecione"/>
+					<f:selectItems value="#{funcionarioBean.enderecos}" var="endereco" 
+						itemLabel="#{endereco}" itemValue="#{endereco}"/>
+				</p:selectOneMenu>
+				
+				<h:outputText value="" />
+				<h:panelGroup style="float:right;">
+					<p:commandButton id="btn-salvar" value="Salvar" icon="pi pi-save" styleClass="ui-button-success" style="margin-right:4px"
+						action="#{funcionarioBean.salvar}" 
+						oncomplete="if (!args.validationFailed) PF('edicaoFuncionarioDialog').hide()" 
+						process="funcionario-dialog" 
+						update="msg-dialog grid-dialogo" />
+						
+					<p:commandButton type="reset" value="Limpar" icon="pi pi-delete-left" styleClass="ui-button-danger"
+						resetValues="true" update="funcionario-dialog"/>
+				</h:panelGroup>
+				
+			</h:panelGrid>
+		</p:dialog>
+		
+	</p:fieldset>
+	</h:form>
+</ui:define>
+</ui:composition>

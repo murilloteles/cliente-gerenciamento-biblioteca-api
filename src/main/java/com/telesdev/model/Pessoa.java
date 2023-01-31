@@ -1,6 +1,7 @@
 package com.telesdev.model;
 
 import java.util.Date;
+import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -62,6 +63,25 @@ public class Pessoa {
 
 	public void setEndereco(Endereco endereco) {
 		this.endereco = endereco;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(documento, endereco, nacionalidade, nascimento, nome);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pessoa other = (Pessoa) obj;
+		return Objects.equals(documento, other.documento) && Objects.equals(endereco, other.endereco)
+				&& Objects.equals(nacionalidade, other.nacionalidade) && Objects.equals(nascimento, other.nascimento)
+				&& Objects.equals(nome, other.nome);
 	}
 	
 }

@@ -1,9 +1,6 @@
 package com.telesdev.controller;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;

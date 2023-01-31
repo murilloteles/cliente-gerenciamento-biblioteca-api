@@ -21,10 +21,10 @@
 		<h:form id="frm-menu">
 		<p:menubar style="margin-top: -20px; margin-bottom: 30px; padding:5px">
 		<p:submenu label="Cadastros" icon="pi pi-wrench">
-				<p:menuitem value="Funcionarios" />
-				<p:menuitem value="Clientes" />
+				<p:menuitem value="Funcionarios" 
+					action="manterFuncionarios?faces-redirect=true"/>
 				<p:menuitem value="Endereços"
-					action="paginas/manterEnderecos?faces-redirect=true" />
+					action="manterEnderecos?faces-redirect=true" />
 		</p:submenu>
 		<f:facet name="options">
 			<p:commandButton value="Logout" action="#{loginBean.logout}" icon="pi pi-sign-out" styleClass="ui-button-danger"/>

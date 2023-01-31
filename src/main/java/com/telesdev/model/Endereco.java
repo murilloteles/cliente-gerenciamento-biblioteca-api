@@ -1,10 +1,11 @@
 package com.telesdev.model;
 
+import java.util.Objects;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -81,9 +82,27 @@ public class Endereco {
 	}
 	
 	@Override
+	public int hashCode() {
+		return Objects.hash(bairro, cep, complemento, id, localidade, logradouro, numero, uf);
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Endereco other = (Endereco) obj;
+		return Objects.equals(bairro, other.bairro) && Objects.equals(cep, other.cep)
+				&& Objects.equals(complemento, other.complemento) && Objects.equals(id, other.id)
+				&& Objects.equals(localidade, other.localidade) && Objects.equals(logradouro, other.logradouro)
+				&& Objects.equals(numero, other.numero) && Objects.equals(uf, other.uf);
+	}
+	@Override
 	public String toString() {
-		return "Endereco [cep=" + cep + ", logradouro=" + logradouro + ", complemento=" + complemento + ", bairro="
-				+ bairro + ", numero=" + numero + ", localidade=" + localidade + ", uf=" + uf + "]";
+		return logradouro +" "+ complemento +", "+ numero + ", "
+				+ bairro + " " + localidade + ", " +uf + ", CEP: " + cep;
 	}
 
 }
